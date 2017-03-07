@@ -2,21 +2,18 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const nunjucks = require('nunjucks');
+const routes = require('./routes')
 
-const people = [{name: 'Full'}, {name: 'Stacker'}, {name: 'Son'}];
+//nunjucks
 app.set('view engine', 'html');
 app.engine('html', nunjucks.render);
 nunjucks.configure('views', {noCache: true});
 
-// res.render( 'index', {title: 'Hall of Fame', people: people} );
-
-
+//middleware
 app.use(morgan('dev'));
 
-app.get('/', function(req, res) {
-	console.log("Welcome nodemon!");
-	res.render( 'index', {title: 'Hall of Fame', people: people} );
-});
+//direct route request to routes directory
+app.use('/', routes)
 
 
 
