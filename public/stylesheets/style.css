@@ -57,3 +57,17 @@ code {
 .content .by {
   font-weight: bold;
 }
+
+.bird{
+  height: 50px;
+  width: 50px;
+}
+
+.alltweets{
+  list-style: none;
+}
+
+.indivtweet{
+  padding: 20px 0px 20px 0px;
+
+}

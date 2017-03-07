@@ -13,12 +13,9 @@ nunjucks.configure('views', {noCache: true});
 app.use(morgan('dev'));
 app.use(express.static('public'));
 
+
 //direct route request to routes directory
 app.use('/', routes)
-
-
-
-
 
 
 
