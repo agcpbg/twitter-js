@@ -17,11 +17,8 @@ app.use(bodyParser.urlencoded({extended:false}))
 app.use(bodyParser.json())
 
 
-
 //direct route request to routes directory
 app.use('/', routes)
-
-
 
 
 app.listen(3000, function() {

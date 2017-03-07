@@ -17,7 +17,7 @@ router.get('/users/:name',function(req,res){
 		if(tweet.name.toLowerCase() === name.toLowerCase()) return true
 	})
 	console.log(person)
-	res.render('index', {tweets: person})
+	res.render('index', {tweets: person, showForm: true, name: name})
 })
 
 router.get('/tweets/:id', function(req,res){
