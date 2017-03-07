@@ -20,6 +20,11 @@ router.get('/users/:name',function(req,res){
 	res.render('index', {tweets: person})
 })
 
+// router.get('/users/:id', function(req,res){
+// 	let id = req.params.id;
+// 	let person = tweetBank.find(function())
+// })
+
 
 
 
