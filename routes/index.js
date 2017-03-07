@@ -20,12 +20,17 @@ router.get('/users/:name',function(req,res){
 	res.render('index', {tweets: person})
 })
 
-// router.get('/users/:id', function(req,res){
-// 	let id = req.params.id;
-// 	let person = tweetBank.find(function())
-// })
+router.get('/tweets/:id', function(req,res){
+	let id = req.params.id;
+	let person = tweetBank.find(function(tweet) {
+		if(tweet.id === parseInt(id)) { return true; }
+	})
+	res.render('index', {tweets: person})
+})
 
-
+router.get('/tweets/', function(req,res){
+	res.render('index', {showForm: true})
+})
 
 
 
