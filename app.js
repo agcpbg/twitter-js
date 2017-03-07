@@ -2,7 +2,8 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const nunjucks = require('nunjucks');
-const routes = require('./routes')
+const routes = require('./routes');
+var socketio = require('socket.io');
 
 //nunjucks
 app.set('view engine', 'html');
@@ -18,9 +19,11 @@ app.use(bodyParser.json())
 
 
 //direct route request to routes directory
-app.use('/', routes)
+app.use('/', routes(io));
 
 
-app.listen(3000, function() {
+var server = app.listen(3000, function() {
 	console.log("server listening");
 });
+
+var io = socketio.listen(server);
