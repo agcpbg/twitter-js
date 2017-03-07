@@ -12,6 +12,10 @@ nunjucks.configure('views', {noCache: true});
 //middleware
 app.use(morgan('dev'));
 app.use(express.static('public'));
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended:false}))
+app.use(bodyParser.json())
+
 
 
 //direct route request to routes directory

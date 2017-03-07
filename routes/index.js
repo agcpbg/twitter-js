@@ -32,6 +32,14 @@ router.get('/tweets/', function(req,res){
 	res.render('index', {showForm: true})
 })
 
+router.post('/tweets/', function(req, res) {
+	console.log('print req body', req.body)
+	let name = req.body.name;
+	let text = req.body.text;
+	tweetBank.add(name, text)
+	res.redirect('/')
+})
+
 
 
 module.exports = router;
