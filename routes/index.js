@@ -1,50 +1,74 @@
-const express = require('express')
-const router = express.Router();
-const tweetBank = require('../tweetBank')
+'use strict';
+var express = require('express');
+var router = express.Router();
+// var tweetBank = require('../tweetBank');
+const client = require('../db/index');
 
+module.exports = function makeRouterWithSockets (io) {
 
-module.exports = function(io) {
+  // a reusable function
 
-	router.get('/', function(req, res) {
-		let tweets = tweetBank.list();
-		console.log(tweets);
-		res.render('index', {tweets: tweets})
-	})
+  function respondWithAllTweets(req, res, next) { client.query('SELECT tweets.content, users.name, tweets.id, tweets.user_id, users.picture_url FROM tweets JOIN users ON tweets.user_id = users.id', function (err, result) {
+    if (err) return next(err);
+    var allTheTweets = result.rows;
+    res.render('index', {
+      title: 'Twitter.js',
+      tweets: allTheTweets,
+      showForm: true
+    });
+  });}
 
-	router.get('/users/:name',function(req,res){
-		let name = req.params.name;
-		let person = tweetBank.find(function(tweet){
-			console.log('tweet:',tweet)
-			console.log('name:',name)
-			if(tweet.name.toLowerCase() === name.toLowerCase()) return true
-		})
-		console.log(person)
-		res.render('index', {tweets: person, showForm: true, name: name})
-	})
+  router.get('/', respondWithAllTweets);
 
-	router.get('/tweets/:id', function(req,res){
-		let id = req.params.id;
-		let person = tweetBank.find(function(tweet) {
-			if(tweet.id === parseInt(id)) { return true; }
-		})
-		res.render('index', {tweets: person})
-	})
+  // here we basically treet the root view and tweets view as identical
+  router.get('/tweets', respondWithAllTweets);
 
-	router.get('/tweets/', function(req,res){
-		res.render('index', {showForm: true})
-	})
+  // single-user page
+  router.get('/users/:username', function(req, res, next){
+    client.query('SELECT tweets.content, users.name, tweets.id, tweets.user_id, users.picture_url FROM tweets JOIN users ON tweets.user_id = users.id WHERE users.name = $1', [req.params.username], function (err, result) {
+    if (err) return next(err);
+    var tweetsForName = result.rows;
+    res.render('index', {
+      title: 'Twitter.js',
+      tweets: tweetsForName,
+      showForm: true,
+      username: req.params.username
+    });
+  });})
 
-	router.post('/tweets/', function(req, res) {
-		console.log('print req body', req.body)
-		let name = req.body.name;
-		let text = req.body.text;
-		tweetBank.add(name, text)
-		res.redirect('/')
-	})
+  // single-tweet page
+  router.get('/tweets/:id', function(req, res, next){
+    client.query('SELECT tweets.content, users.name, tweets.id, tweets.user_id, users.picture_url FROM tweets JOIN users ON tweets.user_id = users.id WHERE tweets.id = $1', [req.params.id], function (err, result) {
+    if (err) return next(err);
+    var tweetsForName = result.rows;
+    res.render('index', {
+      title: 'Twitter.js',
+      tweets: tweetsForName,
+      showForm: true,
+    });
+  });})
 
-	return router;
-};
+// 'INSERT INTO tweets (content, user_id) VALUES($1, SELECT id FROM users WHERE name = $2)'
 
+  // create a new tweet
+  router.post('/tweets', function(req, res, next){
+    client.query('SELECT * FROM users WHERE name = $1', [req.body.name], function (err, result) {
+      var query1 = result.rows;
+      console.log("query1 outside: ", query1);
+      if (query1.length === 0) {
+        client.query('INSERT INTO users (name) VALUES ($1)', [req.body.name], function (err, result) {
+          query1 = result.rows;
+          console.log("inside", result.rows);
+        })
+      }
+      client.query('INSERT INTO tweets (content, user_id) VALUES ($1, $2)', [req.body.text, query1[0].id], function (err, result) {
+      if (err) return next(err);
+      var newTweet = result.rows;
+      io.sockets.emit('new_tweet', newTweet);
+      res.redirect('/');
+  });});});
 
+  
 
-
+  return router;
+}
